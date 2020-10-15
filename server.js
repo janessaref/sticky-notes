@@ -59,6 +59,20 @@ app.post("/api/notes", function(req, res) {
 
 });
 
+app.get("/api/notes/:id", function(req, res) {
+    var viewNote = req.params.id;
+
+    console.log(viewNote);
+
+    for (var i = 0; i < viewNote.length; i++) {
+        if (viewNote === id[i]) {
+            return res.json(viewNote[i]);
+        }
+    }
+
+    return res.json(false);
+});
+
 app.delete("/api/notes/:id", function(req, res) {
     let index = req.params.id;
     // let index = req.body.index;
@@ -68,10 +82,14 @@ app.delete("/api/notes/:id", function(req, res) {
         if (err) throw err;
         data = JSON.parse(data);
         data.splice(index, 1);
-    })
+        console.log(data);
 
-    res.send("note deleted");
-})
+        fs.writeFile("./db/db.json", JSON.stringify(data, null, 1), function(err) {
+            if (err) throw err;
+            res.status(200).json({ status: "ok" });
+        })
+    });
+});
 
 // listener to start the server
 app.listen(PORT, function() {
