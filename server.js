@@ -12,7 +12,7 @@
 let express = require("express");
 let path = require("path");
 let fs = require("fs");
-
+let savednotes = require("./db/db.json");
 
 // sets up the express app telling node we are creating an express server
 let app = express();
@@ -25,14 +25,53 @@ app.use(express.static("public"));
 
 
 //  code below is when users visit another page or click a button
-// If no matching route is found default to home
 app.get("/", function(req, res) {
     res.sendFile(path.join(__dirname, "public/index.html"));
 });
 
 app.get("/notes", function(req, res) {
     res.sendFile(path.join(__dirname, "public/notes.html"));
+
 });
+
+// api/notes displays all notes
+app.get("/api/notes", function(req, res) {
+    res.json(savednotes);
+});
+
+
+app.post("/api/notes", function(req, res) {
+    let newNote = req.body;
+    savednotes.push(newNote);
+
+    fs.readFile("./db/db.json", "utf8", function(err, data) {
+        if (err) throw err;
+        console.log(data);
+        let parsedData = JSON.parse(data);
+        parsedData.push(newNote);
+        // console.log(parsedData);
+
+        fs.writeFile("./db/db.json", JSON.stringify(parsedData, null, 1), function(err) {
+            if (err) throw err;
+            res.status(200).json({ status: "ok", newNote: newNote });
+        })
+    });
+
+});
+
+app.delete("/api/notes/:id", function(req, res) {
+    let index = req.params.id;
+    // let index = req.body.index;
+    // console.log(req.data);
+
+    fs.readFile("./db/db.json", "utf8", function(err, data) {
+        if (err) throw err;
+        data = JSON.parse(data);
+        data.splice(index, 1);
+    })
+
+    res.send("note deleted");
+})
 
 // listener to start the server
 app.listen(PORT, function() {
