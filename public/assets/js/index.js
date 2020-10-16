@@ -26,9 +26,8 @@ var saveNote = function(note) {
 
 // A function for deleting a note from the db
 var deleteNote = function(id) {
-    console.log(id);
     return $.ajax({
-        url: "/api/notes/" + id,
+        url: "api/notes/" + id,
         method: "DELETE"
     });
 };
@@ -69,14 +68,14 @@ var handleNoteDelete = function(event) {
     event.stopPropagation();
 
     var note = $(this)
-        .parent(".list-group-item");
-    // console.log(note.attr("id"));
+        .parent(".list-group-item")
+        .data();
 
-    if (activeNote.id === note.attr("id")) {
+    if (activeNote.id === note.id) {
         activeNote = {};
     }
 
-    deleteNote(note.attr("id")).then(function() {
+    deleteNote(note.id).then(function() {
         getAndRenderNotes();
         renderActiveNote();
     });
@@ -85,8 +84,6 @@ var handleNoteDelete = function(event) {
 // Sets the activeNote and displays it
 var handleNoteView = function() {
     activeNote = $(this).data();
-    // $noteText.text(activeNote);
-    // console.log(activeNote)
     renderActiveNote();
 };
 
@@ -115,7 +112,7 @@ var renderNoteList = function(notes) {
     for (var i = 0; i < notes.length; i++) {
         var note = notes[i];
 
-        var $li = $(`<li class='list-group-item' id='${i}'>`).data(note);
+        var $li = $("<li class='list-group-item'>").data(note);
         var $span = $("<span>").text(note.title);
         var $delBtn = $(
             "<i class='fas fa-trash-alt float-right text-danger delete-note'>"

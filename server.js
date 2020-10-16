@@ -24,16 +24,6 @@ app.use(express.json());
 app.use(express.static("public"));
 
 
-//  code below is when users visit another page or click a button
-app.get("/", function(req, res) {
-    res.sendFile(path.join(__dirname, "public/index.html"));
-});
-
-app.get("/notes", function(req, res) {
-    res.sendFile(path.join(__dirname, "public/notes.html"));
-
-});
-
 // api/notes displays all notes
 app.get("/api/notes", function(req, res) {
     res.json(savednotes);
@@ -42,35 +32,35 @@ app.get("/api/notes", function(req, res) {
 
 app.post("/api/notes", function(req, res) {
     let newNote = req.body;
+    // console.log(newNote);
     savednotes.push(newNote);
+    // console.log(savednotes)
+
+    for (let i = 0; i < savednotes.length; i++) {
+
+        function adduniqueID(obj, key, id) {
+            obj[key] = id.toString();
+        };
+        savednotes.map(function(note) {
+            return adduniqueID(note, "id", i++);
+        });
+    }
+    console.log(newNote)
 
     fs.readFile("./db/db.json", "utf8", function(err, data) {
         if (err) throw err;
-        console.log(data);
+        // console.log(data);
         let parsedData = JSON.parse(data);
-        parsedData.push(newNote);
         // console.log(parsedData);
+        parsedData.push(newNote);
+
 
         fs.writeFile("./db/db.json", JSON.stringify(parsedData, null, 1), function(err) {
             if (err) throw err;
-            res.status(200).json({ status: "ok", newNote: newNote });
+            res.status(200).json({ status: "ok" });
         })
     });
 
-});
-
-app.get("/api/notes/:id", function(req, res) {
-    var viewNote = req.params.id;
-
-    console.log(viewNote);
-
-    for (var i = 0; i < viewNote.length; i++) {
-        if (viewNote === id[i]) {
-            return res.json(viewNote[i]);
-        }
-    }
-
-    return res.json(false);
 });
 
 app.delete("/api/notes/:id", function(req, res) {
@@ -78,17 +68,37 @@ app.delete("/api/notes/:id", function(req, res) {
     // let index = req.body.index;
     // console.log(req.data);
 
-    fs.readFile("./db/db.json", "utf8", function(err, data) {
-        if (err) throw err;
-        data = JSON.parse(data);
-        data.splice(index, 1);
-        console.log(data);
+    for (let j = 0; j < savednotes.length; j++) {
+        if (savednotes[j].id === index) {
+            savednotes.splice(j.toString(), 1);
+        }
+    }
 
-        fs.writeFile("./db/db.json", JSON.stringify(data, null, 1), function(err) {
-            if (err) throw err;
-            res.status(200).json({ status: "ok" });
-        })
+    for (let i = 0; i < savednotes.length; i++) {
+
+        function adduniqueID(obj, key, id) {
+            obj[key] = id.toString();
+        };
+        savednotes.map(function(note) {
+            return adduniqueID(note, "id", i++);
+        });
+    }
+
+    fs.writeFile("./db/db.json", JSON.stringify(savednotes, null, 1), function(err) {
+        if (err) throw err;
+        res.status(200).json({ status: "ok" });
+
     });
+});
+
+//  code below is when users visit another page or click a button
+app.get("/notes", function(req, res) {
+    res.sendFile(path.join(__dirname, "public/notes.html"));
+
+});
+
+app.get("*", function(req, res) {
+    res.sendFile(path.join(__dirname, "public/index.html"));
 });
 
 // listener to start the server
