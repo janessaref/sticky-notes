@@ -23,13 +23,12 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static("public"));
 
-
 // api/notes displays all notes
 app.get("/api/notes", function(req, res) {
     res.json(savednotes);
 });
 
-// creates a new note
+// creates a new note and saves the note
 app.post("/api/notes", function(req, res) {
     let newNote = req.body;
     savednotes.push(newNote);
@@ -42,7 +41,7 @@ app.post("/api/notes", function(req, res) {
         savednotes.map(function(note) {
             return adduniqueID(note, "id", i++);
         });
-    }
+    };
 
     // allows db.json to be read, parses the data, then pushes the new note created into the parsedData variable
     fs.readFile("./db/db.json", "utf8", function(err, data) {
@@ -56,7 +55,6 @@ app.post("/api/notes", function(req, res) {
             res.status(200).json({ status: "ok" });
         });
     });
-
 });
 
 // deletes the note containing the unique ID
@@ -84,14 +82,12 @@ app.delete("/api/notes/:id", function(req, res) {
     fs.writeFile("./db/db.json", JSON.stringify(savednotes, null, 1), function(err) {
         if (err) throw err;
         res.status(200).json({ status: "ok" });
-
     });
 });
 
 //  code below is when users visit another page
 app.get("/notes", function(req, res) {
     res.sendFile(path.join(__dirname, "public/notes.html"));
-
 });
 
 app.get("*", function(req, res) {
